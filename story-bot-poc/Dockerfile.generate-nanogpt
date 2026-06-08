@@ -1,0 +1,25 @@
+# Dockerfile for generating stories with nanoGPT
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PyTorch (CPU version for smaller image) and tiktoken for BPE
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir tiktoken
+
+# Copy nanoGPT module and generation scripts
+COPY nanogpt/ ./nanogpt/
+COPY generate_nanogpt.py .
+COPY generate_nanogpt_rag.py .
+
+# Volume for trained model
+VOLUME ["/app/nanogpt-model"]
+
+# Default command
+ENTRYPOINT ["python", "generate_nanogpt.py"]
+CMD ["Once upon a time"]
