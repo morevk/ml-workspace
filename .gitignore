@@ -1,0 +1,82 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Type checkers / linters
+.mypy_cache/
+.ruff_cache/
+.pytype/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE / editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+secrets/
+
+# Project outputs
+plots/
+
+# TensorFlow / Keras checkpoints and logs
+checkpoints/
+saved_models/
+logs/
+tensorboard/
+*.keras
+*.h5
+*.pb
+
+# Local datasets (commit small samples under tests/fixtures/ if needed)
+data/
+*.csv
+!tests/fixtures/**/*.csv
+
+# Logs and temp files
+*.log
+tmp/
+temp/
+.cache/
