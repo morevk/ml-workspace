@@ -1,0 +1,27 @@
+# Dockerfile for training the nanoGPT model from scratch
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PyTorch (CPU version for smaller image) and tiktoken for BPE
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir tiktoken
+
+# Copy nanoGPT module and training script
+COPY nanogpt/ ./nanogpt/
+COPY train_nanogpt.py .
+COPY data/ ./data/
+
+# Create output directory
+RUN mkdir -p /app/nanogpt-model
+
+# Volume for model output
+VOLUME ["/app/nanogpt-model"]
+
+# Default training command
+CMD ["python", "train_nanogpt.py", "--iters", "2000"]

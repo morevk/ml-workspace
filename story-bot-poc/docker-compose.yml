@@ -1,0 +1,226 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # HUGGING FACE APPROACH (Pre-trained models)
+  # ============================================
+  
+  # Training with TinyLlama (recommended for best quality)
+  train-tinyllama:
+    build:
+      context: .
+      dockerfile: Dockerfile.train
+    volumes:
+      - tinyllama-model-data:/app/story-model
+      - ./data:/app/data:ro
+    command: ["python", "train.py", "--model", "tinyllama"]
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+
+  # Training with distilgpt2 (lightweight, fast)
+  train-distilgpt2:
+    build:
+      context: .
+      dockerfile: Dockerfile.train
+    volumes:
+      - distilgpt2-model-data:/app/story-model
+      - ./data:/app/data:ro
+    command: ["python", "train.py", "--model", "distilgpt2"]
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  # Training with gpt2-medium (better than distilgpt2)
+  train-gpt2-medium:
+    build:
+      context: .
+      dockerfile: Dockerfile.train
+    volumes:
+      - gpt2medium-model-data:/app/story-model
+      - ./data:/app/data:ro
+    command: ["python", "train.py", "--model", "gpt2-medium"]
+    deploy:
+      resources:
+        limits:
+          memory: 6G
+
+  # Default train service (uses TinyLlama)
+  train:
+    build:
+      context: .
+      dockerfile: Dockerfile.train
+    volumes:
+      - model-data:/app/story-model
+      - ./data:/app/data:ro
+    command: ["python", "train.py", "--model", "tinyllama"]
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+
+  # Generation with TinyLlama
+  generate-tinyllama:
+    build:
+      context: .
+      dockerfile: Dockerfile.generate
+    volumes:
+      - tinyllama-model-data:/app/story-model:ro
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  # Generation with distilgpt2
+  generate-distilgpt2:
+    build:
+      context: .
+      dockerfile: Dockerfile.generate
+    volumes:
+      - distilgpt2-model-data:/app/story-model:ro
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  # Generation with gpt2-medium
+  generate-gpt2-medium:
+    build:
+      context: .
+      dockerfile: Dockerfile.generate
+    volumes:
+      - gpt2medium-model-data:/app/story-model:ro
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+
+  # Default generate service
+  generate:
+    build:
+      context: .
+      dockerfile: Dockerfile.generate
+    volumes:
+      - model-data:/app/story-model:ro
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  # ============================================
+  # NANOGPT APPROACH (Training from scratch)
+  # ============================================
+  
+  # Training with character-level tokenization
+  train-nanogpt:
+    build:
+      context: .
+      dockerfile: Dockerfile.train-nanogpt
+    volumes:
+      - nanogpt-model-data:/app/nanogpt-model
+      - ./data:/app/data:ro
+    command: ["python", "train_nanogpt.py", "--tokenizer", "char", "--iters", "2000"]
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  # Training with BPE tokenization
+  train-nanogpt-bpe:
+    build:
+      context: .
+      dockerfile: Dockerfile.train-nanogpt
+    volumes:
+      - nanogpt-bpe-model-data:/app/nanogpt-model
+      - ./data:/app/data:ro
+    command: ["python", "train_nanogpt.py", "--tokenizer", "bpe", "--iters", "2000"]
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  # Generation with character-level model
+  generate-nanogpt:
+    build:
+      context: .
+      dockerfile: Dockerfile.generate-nanogpt
+    volumes:
+      - nanogpt-model-data:/app/nanogpt-model:ro
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # Generation with BPE model
+  generate-nanogpt-bpe:
+    build:
+      context: .
+      dockerfile: Dockerfile.generate-nanogpt
+    volumes:
+      - nanogpt-bpe-model-data:/app/nanogpt-model:ro
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # RAG Generation (character-level)
+  generate-nanogpt-rag:
+    build:
+      context: .
+      dockerfile: Dockerfile.generate-nanogpt
+    volumes:
+      - nanogpt-model-data:/app/nanogpt-model:ro
+    stdin_open: true
+    tty: true
+    entrypoint: ["python", "generate_nanogpt_rag.py"]
+    command: ["--interactive", "--show-context"]
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # RAG Generation (BPE)
+  generate-nanogpt-bpe-rag:
+    build:
+      context: .
+      dockerfile: Dockerfile.generate-nanogpt
+    volumes:
+      - nanogpt-bpe-model-data:/app/nanogpt-model:ro
+    stdin_open: true
+    tty: true
+    entrypoint: ["python", "generate_nanogpt_rag.py"]
+    command: ["--interactive", "--show-context"]
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+volumes:
+  # Hugging Face models
+  model-data:
+    name: story-bot-model
+  tinyllama-model-data:
+    name: story-bot-tinyllama-model
+  distilgpt2-model-data:
+    name: story-bot-distilgpt2-model
+  gpt2medium-model-data:
+    name: story-bot-gpt2medium-model
+  # NanoGPT models
+  nanogpt-model-data:
+    name: story-bot-nanogpt-model
+  nanogpt-bpe-model-data:
+    name: story-bot-nanogpt-bpe-model
